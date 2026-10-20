@@ -130,26 +130,30 @@ end
 --- @param dark_name string: Dark theme name
 --- @param light_name string: Light theme name
 local function update_ghostty_config(dark_name, light_name)
-	local config_path = config.options.ghostty_config_path
+	local config_path = config.ensure_config_path()
+	local new_line = "theme = dark:" .. dark_name .. ", light:" .. light_name
 	local lines = {}
-	local found = false
+	local written = false
 
 	for line in io.lines(config_path) do
-		if line:match("^theme%s*=%s*") then
-			table.insert(lines, "theme = dark:" .. dark_name .. ", light:" .. light_name)
-			found = true
+		if line:match("^%s*theme%s*=") then
+			-- Replace the first theme line, drop later duplicates
+			if not written then
+				table.insert(lines, new_line)
+				written = true
+			end
 		else
 			table.insert(lines, line)
 		end
 	end
 
-	if not found then
-		table.insert(lines, "theme = dark:" .. dark_name .. ", light:" .. light_name)
+	if not written then
+		table.insert(lines, new_line)
 	end
 
 	local file = io.open(config_path, "w")
 	if not file then
-		error("Failed to open ghostty config to write")
+		error("Failed to open ghostty config to write: " .. config_path)
 	end
 	for _, line in ipairs(lines) do
 		file:write(line .. "\n")

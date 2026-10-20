@@ -1,5 +1,8 @@
 local M = {}
 
+-- LuaJIT (default Neovim build) has math.atan2; other Lua versions use two-arg atan
+local atan2 = math.atan2 or math.atan
+
 --- Get the RGB values from a highlight color
 --- @param color table|number|string: The color value
 --- @return table|nil {r, g, b} in 0-255 range
@@ -154,8 +157,8 @@ function M.get_theme_colors()
 
 		-- Sort by hue for better color distribution
 		table.sort(all_colors, function(a, b)
-			local ha = math.atan2(a.b - a.g, a.r - a.g)
-			local hb = math.atan2(b.b - b.g, b.r - b.g)
+			local ha = atan2(a.b - a.g, a.r - a.g)
+			local hb = atan2(b.b - b.g, b.r - b.g)
 			return ha < hb
 		end)
 
